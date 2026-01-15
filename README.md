@@ -89,14 +89,44 @@ USING (bucket_id = 'price-audit-photos');
 
 ### 5. Create Test Users
 
-1. Go to Supabase Dashboard > **Authentication > Users**
-2. Click "Add User" and create test accounts:
+**IMPORTANT:** Users MUST be created through the Supabase Dashboard, NOT via SQL. Direct SQL inserts are missing required auth metadata.
 
-| Email | Password | Metadata |
-|-------|----------|----------|
-| admin@central.tl | Test123! | `{"full_name": "Admin User", "role": "admin", "sector": "Central"}` |
-| worker1@central.tl | Test123! | `{"full_name": "Maria Santos", "role": "field_worker", "sector": "Central"}` |
-| worker1@ensul.tl | Test123! | `{"full_name": "João Silva", "role": "field_worker", "sector": "Ensul"}` |
+#### Step 1: Create users in Dashboard
+1. Go to Supabase Dashboard > **Authentication > Users**
+2. Click **"Add User"** > **"Create new user"**
+3. For each user below, enter email + password and check **"Auto Confirm User"**:
+
+| Email | Password |
+|-------|----------|
+| admin@central.tl | Test123! |
+| worker1@central.tl | Test123! |
+| worker1@ensul.tl | Test123! |
+
+#### Step 2: Update user metadata via SQL Editor
+After creating users, run this in **SQL Editor** to set their roles:
+
+```sql
+-- Admin user
+UPDATE auth.users SET raw_user_meta_data = jsonb_build_object(
+    'full_name', 'Admin User', 'role', 'admin', 'sector', 'Central'
+) WHERE email = 'admin@central.tl';
+UPDATE public.users SET full_name = 'Admin User', role = 'admin', sector = 'Central'
+WHERE email = 'admin@central.tl';
+
+-- Field Worker - Central
+UPDATE auth.users SET raw_user_meta_data = jsonb_build_object(
+    'full_name', 'Maria Santos', 'role', 'field_worker', 'sector', 'Central'
+) WHERE email = 'worker1@central.tl';
+UPDATE public.users SET full_name = 'Maria Santos', role = 'field_worker', sector = 'Central'
+WHERE email = 'worker1@central.tl';
+
+-- Field Worker - Ensul
+UPDATE auth.users SET raw_user_meta_data = jsonb_build_object(
+    'full_name', 'Joao Silva', 'role', 'field_worker', 'sector', 'Ensul'
+) WHERE email = 'worker1@ensul.tl';
+UPDATE public.users SET full_name = 'Joao Silva', role = 'field_worker', sector = 'Ensul'
+WHERE email = 'worker1@ensul.tl';
+```
 
 ### 6. Run Development Server
 

@@ -118,31 +118,23 @@ ALTER TABLE public.price_audits ENABLE ROW LEVEL SECURITY;
 -- ----------------------------------------
 -- USERS TABLE POLICIES
 -- ----------------------------------------
+-- NOTE: These policies use JWT claims (auth.jwt()) instead of querying public.users
+-- to avoid recursive policy evaluation which causes "Database error querying schema"
 
 -- Users can read their own profile
 CREATE POLICY "Users can view own profile"
     ON public.users FOR SELECT
     USING (auth.uid() = id);
 
--- Admins can view all users
+-- Admins can view all users (uses JWT metadata to avoid recursion)
 CREATE POLICY "Admins can view all users"
     ON public.users FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
--- Admins can update users
+-- Admins can update users (uses JWT metadata to avoid recursion)
 CREATE POLICY "Admins can update users"
     ON public.users FOR UPDATE
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- ----------------------------------------
 -- PRODUCTS TABLE POLICIES
@@ -156,32 +148,17 @@ CREATE POLICY "Users can view active products"
 -- Admins can view all products (including inactive)
 CREATE POLICY "Admins can view all products"
     ON public.products FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- Admins can insert products
 CREATE POLICY "Admins can insert products"
     ON public.products FOR INSERT
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    WITH CHECK ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- Admins can update products
 CREATE POLICY "Admins can update products"
     ON public.products FOR UPDATE
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- ----------------------------------------
 -- CLIENTS TABLE POLICIES
@@ -195,32 +172,17 @@ CREATE POLICY "Users can view active clients"
 -- Admins can view all clients
 CREATE POLICY "Admins can view all clients"
     ON public.clients FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- Admins can insert clients
 CREATE POLICY "Admins can insert clients"
     ON public.clients FOR INSERT
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    WITH CHECK ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- Admins can update clients
 CREATE POLICY "Admins can update clients"
     ON public.clients FOR UPDATE
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- ----------------------------------------
 -- COMPETITORS TABLE POLICIES
@@ -234,32 +196,17 @@ CREATE POLICY "Users can view active competitors"
 -- Admins can view all competitors
 CREATE POLICY "Admins can view all competitors"
     ON public.competitors FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- Admins can insert competitors
 CREATE POLICY "Admins can insert competitors"
     ON public.competitors FOR INSERT
-    WITH CHECK (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    WITH CHECK ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- Admins can update competitors
 CREATE POLICY "Admins can update competitors"
     ON public.competitors FOR UPDATE
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- ----------------------------------------
 -- PRICE AUDITS TABLE POLICIES
@@ -273,12 +220,7 @@ CREATE POLICY "Users can view own audits"
 -- Admins can view all audits
 CREATE POLICY "Admins can view all audits"
     ON public.price_audits FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- Field workers can create audits
 CREATE POLICY "Users can create audits"
@@ -288,12 +230,7 @@ CREATE POLICY "Users can create audits"
 -- Admins can delete audits
 CREATE POLICY "Admins can delete audits"
     ON public.price_audits FOR DELETE
-    USING (
-        EXISTS (
-            SELECT 1 FROM public.users
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
 
 -- ============================================
 -- FUNCTION: Auto-create user profile on signup

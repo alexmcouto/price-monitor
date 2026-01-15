@@ -53,32 +53,36 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect to dashboard if authenticated and trying to access login
-  if (user && request.nextUrl.pathname === '/login') {
-    const url = request.nextUrl.clone();
-    
-    // Get user role from the users table
+  // Helper function to get user role with fallback
+  const getUserRole = async (): Promise<string> => {
+    // Try to get role from users table first
     const { data: userData } = await supabase
       .from('users')
       .select('role')
-      .eq('id', user.id)
+      .eq('id', user!.id)
       .single();
     
-    url.pathname = userData?.role === 'admin' ? '/admin' : '/dashboard';
+    if (userData?.role) {
+      return userData.role;
+    }
+    
+    // Fallback to user metadata
+    return (user!.user_metadata?.role as string) || 'field_worker';
+  };
+
+  // Redirect to dashboard if authenticated and trying to access login
+  if (user && request.nextUrl.pathname === '/login') {
+    const url = request.nextUrl.clone();
+    const role = await getUserRole();
+    url.pathname = role === 'admin' ? '/admin' : '/dashboard';
     return NextResponse.redirect(url);
   }
 
   // Redirect root to appropriate dashboard
   if (user && request.nextUrl.pathname === '/') {
     const url = request.nextUrl.clone();
-    
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-    
-    url.pathname = userData?.role === 'admin' ? '/admin' : '/dashboard';
+    const role = await getUserRole();
+    url.pathname = role === 'admin' ? '/admin' : '/dashboard';
     return NextResponse.redirect(url);
   }
 

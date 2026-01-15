@@ -1,16 +1,25 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button, Input, Card } from '@/components/ui';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Pre-fill form from URL params (for testing)
+  useEffect(() => {
+    const emailParam = searchParams.get('email');
+    const passwordParam = searchParams.get('password');
+    if (emailParam) setEmail(emailParam);
+    if (passwordParam) setPassword(passwordParam);
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,14 +41,26 @@ export default function LoginPage() {
 
     // Get user role to redirect appropriately
     if (data.user) {
-      const { data: userData } = await supabase
+      let role: string | undefined;
+
+      // First, try to get role from users table
+      const { data: userData, error: profileError } = await supabase
         .from('users')
         .select('role')
         .eq('id', data.user.id)
         .single();
 
-      const role = (userData as { role: string } | null)?.role;
-      const redirectPath = role === 'admin' ? '/admin' : '/dashboard';
+      if (userData && !profileError) {
+        role = (userData as { role: string }).role;
+      } else {
+        // Fallback: get role from auth user metadata
+        // This handles cases where user profile wasn't auto-created
+        role = data.user.user_metadata?.role as string | undefined;
+      }
+
+      // Default to field_worker if no role found
+      const finalRole = role || 'field_worker';
+      const redirectPath = finalRole === 'admin' ? '/admin' : '/dashboard';
       router.push(redirectPath);
     }
   };
@@ -79,25 +100,15 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              icon={
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                </svg>
-              }
             />
 
             <Input
               type="password"
               label="Password"
-              placeholder="••••••••"
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              icon={
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              }
             />
 
             {error && (

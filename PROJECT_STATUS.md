@@ -1,7 +1,7 @@
 # Price Monitor - Project Status & Continuity Document
 
 > This document captures the complete project state for continuity across AI context windows.
-> Last Updated: January 15, 2026
+> Last Updated: January 15, 2026 (Testing Phase)
 
 ---
 
@@ -244,6 +244,83 @@ price-monitor/
 
 ---
 
+## 🧪 TESTING STATUS (In Progress)
+
+> Last Updated: January 15, 2026 (End of Session)
+
+### Major Blocker RESOLVED: Login Authentication
+
+The "Database error querying schema" issue has been diagnosed and partially fixed. See `TROUBLESHOOTING_LOG.md` for full details.
+
+**Summary of Issues Found:**
+1. Users created via SQL (not Supabase Dashboard) are missing auth metadata
+2. RLS policies on `public.users` had recursive self-references causing schema introspection failures
+
+**Current State:**
+- ✅ Login WORKS when users are created properly via Dashboard
+- ✅ Login WORKS with RLS disabled on users table
+- ⚠️ Test users need to be recreated via Dashboard (old ones were created via SQL)
+- ⚠️ RLS on users table is currently DISABLED (needs fixed policies)
+
+### Testing Progress
+
+| Test Area | Status | Notes |
+|-----------|--------|-------|
+| Smoke Tests (Auth) | ⚠️ Partial | Login works with properly created users |
+| Navigation | Not Started | |
+| Field Worker Flow | Not Started | |
+| Admin CRUD | Not Started | |
+| Export Feature | Not Started | |
+| Edge Cases | Not Started | |
+| Mobile Testing | Not Started | |
+
+### Potential Bugs Identified (Code Review)
+
+| Issue | File | Description | Severity |
+|-------|------|-------------|----------|
+| Mobile nav truncation | `components/layout/Navigation.tsx:111` | Admin has 6 nav links but mobile only shows first 5 (`links.slice(0, 5)`) - Export link hidden on mobile | Medium |
+| Toast SSR issue | `components/ui/Toast.tsx:87-102` | Manual DOM manipulation for keyframe animation could cause SSR hydration issues | Low |
+| Inefficient export | `app/(protected)/admin/export/page.tsx` | Fetches all audits then filters client-side instead of server-side filtering | Low |
+| No input sanitization | Various form pages | Form inputs not sanitized before database insertion (relies on RLS only) | Low |
+
+### FOR NEXT SESSION - Priority Actions
+
+1. **Recreate test users properly:**
+   ```sql
+   -- First, delete broken users
+   DELETE FROM auth.users 
+   WHERE email IN ('admin@central.tl', 'worker1@central.tl', 'worker1@ensul.tl');
+   ```
+   Then create via Dashboard (Authentication > Users > Add User) with Auto Confirm checked.
+
+2. **Update user metadata after creation:**
+   ```sql
+   UPDATE auth.users SET raw_user_meta_data = jsonb_build_object(
+       'full_name', 'Admin User', 'role', 'admin', 'sector', 'Central'
+   ) WHERE email = 'admin@central.tl';
+   
+   UPDATE public.users SET full_name = 'Admin User', role = 'admin', sector = 'Central'
+   WHERE email = 'admin@central.tl';
+   -- Repeat for other users
+   ```
+
+3. **Re-enable RLS on users table with fixed policies:**
+   ```sql
+   -- These use JWT claims instead of recursive queries
+   CREATE POLICY "Users can view own profile" ON public.users FOR SELECT
+       USING (auth.uid() = id);
+   CREATE POLICY "Admins can view all users" ON public.users FOR SELECT
+       USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
+   CREATE POLICY "Admins can update users" ON public.users FOR UPDATE
+       USING ((auth.jwt() -> 'user_metadata' ->> 'role') = 'admin');
+   
+   ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+   ```
+
+4. **Test full login flow and proceed to feature testing**
+
+---
+
 ## Future Enhancements (Not in Current Scope)
 
 - [ ] Offline-first with background sync
@@ -278,6 +355,9 @@ npm run lint        # Run ESLint
 | Date | Action | Details |
 |------|--------|---------|
 | 2026-01-15 | Initial Deployment | Full app deployed to Vercel, Supabase configured |
+| 2026-01-15 | Testing Started | Testing plan created, MCP browser tool blocker identified, code review bugs documented |
+| 2026-01-15 | Auth Issue Diagnosed | "Database error querying schema" root causes identified: (1) SQL-created users missing auth metadata, (2) recursive RLS policies |
+| 2026-01-15 | Schema Updated | RLS policies rewritten to use JWT claims instead of recursive queries |
 
 ---
 
