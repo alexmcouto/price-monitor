@@ -9,11 +9,20 @@
 
 **Purpose:** Mobile web application for field workers in Timor-Leste to monitor and audit competitor market prices.
 
+**Status:** ✅ **FULLY DEPLOYED AND LIVE**
+
+**Live URLs:**
+| Resource | URL |
+|----------|-----|
+| **Production App** | https://price-monitor-sigma.vercel.app |
+| **GitHub Repository** | https://github.com/alexmcouto/price-monitor |
+| **Supabase Dashboard** | https://supabase.com/dashboard/project/kqsqtwmccldjrakzsblh |
+
 **Tech Stack:**
 - Frontend: Next.js 16.1.2 (App Router) + TypeScript + Tailwind CSS
 - Backend: Supabase (PostgreSQL, Auth, Storage)
 - Styling: Retro 80s neon aesthetic (cyan/pink/purple)
-- Deployment: Vercel (pending)
+- Deployment: Vercel (live)
 
 **User Roles:**
 - **Admin:** Full access to all audits, CRUD for products/clients/competitors, export functionality
@@ -92,47 +101,39 @@
 
 ---
 
-## ⏳ PENDING USER ACTIONS
+## ✅ DEPLOYMENT COMPLETED
 
-The codebase is complete. The following steps require user action:
+All infrastructure is set up and the app is live.
 
-### 1. Supabase Project Setup
-```
-1. Create project at https://supabase.com
-2. Get credentials from Project Settings > API:
-   - NEXT_PUBLIC_SUPABASE_URL
-   - NEXT_PUBLIC_SUPABASE_ANON_KEY
-3. Run SQL Editor:
-   - Execute: supabase/migrations/001_initial_schema.sql
-   - Execute: supabase/seed.sql
-4. Create Storage bucket: "price-audit-photos" (Public)
-5. Create test users in Authentication > Users
-```
+### Supabase Configuration
+- **Project ID:** kqsqtwmccldjrakzsblh
+- **Region:** (configured)
+- **Database:** Schema and seed data applied
+- **Storage:** `price-audit-photos` bucket created with policies
+- **Auth:** Test users created, redirect URLs configured
 
-### 2. Environment Configuration
-Create `.env.local` in project root:
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-```
+### Vercel Configuration
+- **Project:** price-monitor
+- **Domain:** https://price-monitor-sigma.vercel.app
+- **Environment Variables:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` configured
+- **GitHub Integration:** Connected to alexmcouto/price-monitor
 
-### 3. GitHub Repository
+### Test Accounts (Created)
+| Email | Password | Role | Sector |
+|-------|----------|------|--------|
+| `admin@central.tl` | `Test123!` | Admin | Central |
+| `worker1@central.tl` | `Test123!` | Field Worker | Central (Food) |
+| `worker1@ensul.tl` | `Test123!` | Field Worker | Ensul (Construction) |
+
+### Local Development
 ```bash
 cd "/Users/alexandrecouto/Documents/999. VIBE CODING/C3/price-monitor"
-git add .
-git commit -m "Initial commit: Price Monitor app"
-git branch -M main
-git remote add origin https://github.com/USERNAME/price-monitor.git
-git push -u origin main
+npm install
+npm run dev
+# Opens at http://localhost:3000
 ```
 
-### 4. Vercel Deployment
-```
-1. Import GitHub repo at https://vercel.com
-2. Add environment variables
-3. Deploy
-4. Update Supabase Auth redirect URLs with Vercel domain
-```
+`.env.local` is already configured with Supabase credentials.
 
 ---
 
@@ -225,13 +226,13 @@ price-monitor/
 
 ---
 
-## Test Accounts (To Be Created)
+## Test Accounts (Active)
 
-| Email | Role | Sector | Metadata |
+| Email | Role | Sector | Password |
 |-------|------|--------|----------|
-| admin@central.tl | admin | Central | `{"full_name":"Admin User","role":"admin","sector":"Central"}` |
-| worker1@central.tl | field_worker | Central | `{"full_name":"Maria Santos","role":"field_worker","sector":"Central"}` |
-| worker1@ensul.tl | field_worker | Ensul | `{"full_name":"João Silva","role":"field_worker","sector":"Ensul"}` |
+| admin@central.tl | admin | Central | `Test123!` |
+| worker1@central.tl | field_worker | Central | `Test123!` |
+| worker1@ensul.tl | field_worker | Ensul | `Test123!` |
 
 ---
 
@@ -272,12 +273,21 @@ npm run lint        # Run ESLint
 
 ---
 
+## Deployment History
+
+| Date | Action | Details |
+|------|--------|---------|
+| 2026-01-15 | Initial Deployment | Full app deployed to Vercel, Supabase configured |
+
+---
+
 ## Contact / Context
 
 - **Workspace:** `/Users/alexandrecouto/Documents/999. VIBE CODING/C3/price-monitor`
 - **Framework:** Next.js 16.1.2 with Turbopack
 - **Node Version:** Check with `node -v`
-- **Plan File:** `.cursor/plans/market_price_monitor_app_ac47ebec.plan.md`
+- **GitHub CLI:** Installed via Homebrew (`gh`)
+- **Vercel CLI:** Available via `npx vercel`
 
 ---
 

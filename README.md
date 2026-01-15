@@ -1,6 +1,21 @@
 # Price Monitor - Timor-Leste Market Intelligence
 
-A professional-grade mobile web application for field workers to monitor and audit market prices in Timor-Leste. Built with Next.js 14, Supabase, and a retro 80s aesthetic.
+A professional-grade mobile web application for field workers to monitor and audit market prices in Timor-Leste. Built with Next.js 16, Supabase, and a retro 80s aesthetic.
+
+## Live Demo
+
+| Resource | URL |
+|----------|-----|
+| **Production App** | https://price-monitor-sigma.vercel.app |
+| **GitHub Repository** | https://github.com/alexmcouto/price-monitor |
+
+### Test Credentials
+
+| Email | Password | Role |
+|-------|----------|------|
+| `admin@central.tl` | `Test123!` | Admin |
+| `worker1@central.tl` | `Test123!` | Field Worker (Central/Food) |
+| `worker1@ensul.tl` | `Test123!` | Field Worker (Ensul/Construction) |
 
 ## Features
 
@@ -15,9 +30,9 @@ A professional-grade mobile web application for field workers to monitor and aud
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 (App Router), TypeScript, Tailwind CSS
+- **Frontend**: Next.js 16.1.2 (App Router), TypeScript, Tailwind CSS
 - **Backend**: Supabase (PostgreSQL, Auth, Storage)
-- **Hosting**: Vercel (with GitHub CI/CD)
+- **Hosting**: Vercel (deployed and live)
 
 ## Getting Started
 
